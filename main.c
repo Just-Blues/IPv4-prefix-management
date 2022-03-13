@@ -51,6 +51,19 @@ unsigned int convertToIpBase(char* sourceString)
     return result;
 }
 
+
+
+void printIpAddress(unsigned int ip)
+{
+    unsigned char bytes[4];
+    bytes[0] = ip & 0xFF;
+    bytes[1] = (ip >> 8) & 0xFF;
+    bytes[2] = (ip >> 16) & 0xFF;
+    bytes[3] = (ip >> 24) & 0xFF;
+    printf("%d.%d.%d.%d\n", bytes[3], bytes[2], bytes[1], bytes[0]);
+}
+
+
 int main(int argc, char *argv[2])
 {
     printf("Kiss the cook\n");
@@ -68,10 +81,11 @@ int main(int argc, char *argv[2])
     //struct prefix pre3;
 
     //struct prefix pre4;
-    //long int test=0;
 
     pre1.base = convertToIpBase(base1);
     printf("Result: %d\n", pre1.base);
+
+    printIpAddress(pre1.base);
 
 
     //getchar();

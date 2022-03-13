@@ -8,7 +8,6 @@ struct prefix
 {
     unsigned int base; //address stored as 32 bits
     char mask; //stored as char because it's size is 1 byte
-    //struct prefix* left, *right;
 };
 
 
@@ -26,9 +25,10 @@ struct prefix
 //tree would require two additional pointers in struct prefix
 
 
-unsigned int convertToIpBase(char* sourceString)
+unsigned int convertBaseToInt(char* sourceString)
 {
     /*
+        CREATE
         EXCEPTION HANDLING
     */
     short len = 0;
@@ -53,14 +53,14 @@ unsigned int convertToIpBase(char* sourceString)
 
 
 
-void printIpAddress(unsigned int ip)
+void printIpAddress(struct prefix ip)
 {
     unsigned char bytes[4];
-    bytes[0] = ip & 0xFF;
-    bytes[1] = (ip >> 8) & 0xFF;
-    bytes[2] = (ip >> 16) & 0xFF;
-    bytes[3] = (ip >> 24) & 0xFF;
-    printf("%d.%d.%d.%d\n", bytes[3], bytes[2], bytes[1], bytes[0]);
+    bytes[0] = ip.base & 0xFF;
+    bytes[1] = (ip.base >> 8) & 0xFF;
+    bytes[2] = (ip.base >> 16) & 0xFF;
+    bytes[3] = (ip.base >> 24) & 0xFF;
+    printf("%d.%d.%d.%d/%d\n", bytes[3], bytes[2], bytes[1], bytes[0], ip.mask);
 }
 
 
@@ -70,22 +70,34 @@ int main(int argc, char *argv[2])
     //In order to be able to enter ip address as xxx.xxx.xxx.xxx format
     //create buffer unsigned(?) char[4] and function that will "translate" buffer to proper internal addressing mode
     char* base1 = "10.0.5.9";
-    //char* base2 = "255.255.255.255";
-    //char* base3 = "0.0.0.49";
-    //char* base4 = "123.54.0.99";
+    char* base2 = "255.255.255.255";
+    char* base3 = "0.0.0.49";
+    char* base4 = "123.54.0.99";
 
     struct prefix pre1;
+    struct prefix pre2;
+    struct prefix pre3;
+    struct prefix pre4;
 
-    //struct prefix pre2;
+    pre1.base = convertBaseToInt(base1);
+    pre2.base = convertBaseToInt(base2);
+    pre3.base = convertBaseToInt(base3);
+    pre4.base = convertBaseToInt(base4);
 
-    //struct prefix pre3;
+    pre1.mask = 16;
+    pre2.mask = 0;
+    pre3.mask = 2;
+    pre4.mask = 24;
 
-    //struct prefix pre4;
-
-    pre1.base = convertToIpBase(base1);
     printf("Result: %d\n", pre1.base);
+    printf("Result: %d\n", pre2.base);
+    printf("Result: %d\n", pre3.base);
+    printf("Result: %d\n", pre4.base);
 
-    printIpAddress(pre1.base);
+    printIpAddress(pre1);
+    printIpAddress(pre2);
+    printIpAddress(pre3);
+    printIpAddress(pre4);
 
 
     //getchar();

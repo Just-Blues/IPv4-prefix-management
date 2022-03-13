@@ -35,23 +35,6 @@ int binarySearch(unsigned int base)
     return low;
 }
 
-void sort(unsigned int base)
-{
-    unsigned int aux = size,loc;
-    struct prefix storage;
-    for(int i=1; i<size;i++)
-    {
-        aux = i-1;
-        loc = binarySearch(base);
-        while(aux >= loc)
-            {
-                list[aux+1] = list[aux];
-                aux--;
-            }
-        list[aux+1] = storage;
-    }
-}
-
 //will have most responsibilities and will decide whether prefix
 //should be overwritten, extended or just new space should be created
 int add(unsigned int base, char mask)
@@ -111,6 +94,7 @@ int add(unsigned int base, char mask)
 //handle memory space after deleted prefixes
 int del(unsigned int base, char mask)
 {
+
 
     return -2;
 }

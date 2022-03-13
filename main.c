@@ -43,6 +43,7 @@ int add(unsigned int base, char mask)
         TO DO
         1. INTEGER OVERFLOW PREVENTION
         2. CREATE SMARTER SORTING
+        3. ALL PREFIXES MUST BE UNIQUE, can't add the same thing twice
     */
     if(mask < 33 && mask >=0)
     {
@@ -94,15 +95,37 @@ int add(unsigned int base, char mask)
 //handle memory space after deleted prefixes
 int del(unsigned int base, char mask)
 {
-
-
-    return -2;
+    /*
+        TO DO
+        1. INTEGER OVERFLOW PREVENTION
+        2. EXCEPTION HANDLING
+        3. THINK ABOUT WHAT INFLUENCE MASK MIGHT HAVE
+    */
+    if(mask < 33 && mask >=0)
+    {
+        if(base <= 4294967295 && base >= 0)
+        {
+            unsigned int loc = binarySearch(base);
+            for(int i=loc;i<=size-1;i++)
+            {
+                list[i] = list[i+1];
+            }
+            list = realloc(list, sizeof(struct prefix)*(size));
+            size--;
+            return 2;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+    else
+    {
+         return -1;
+    }
 }
 
 //char check(unsigned int ip)
-//this will depend on how the data structure itself will be implemented
-//tree? where "small" ip address are on the left side and big on the right side?
-//tree would require two additional pointers in struct prefix
 
 
 unsigned int convertBaseToInt(char* sourceString)
@@ -144,6 +167,7 @@ void printIpAddress(struct prefix ip)
 void printList()
 {
     struct prefix* ptr = list;
+    printf("Current size: %d\n", size);
     for(int i=0;i<size;i++)
     {
         printIpAddress(ptr[i]);
@@ -164,12 +188,17 @@ int main(int argc, char *argv[2])
     result = add(42949629, 31);
     result = add(31772344, 21);
     result = add(29496725, 14);
+    result = add(0, 32);
     result = add(3329496725, 5);
     result = add(57, 9);
     result = add(317744, 11);
     result = add(22222222,22);
+    result = add(4294967295,0);
+    printList();
 
-    printf("%d\n", result);
+
+    result = del(4294967295,0);
+    printf("Result of last function: %d, Final size: %d\n", result, size);
     printList();
 
     /*

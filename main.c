@@ -9,7 +9,48 @@ struct prefix
     char mask; //stored as char because it's size is 1 byte
 };
 struct prefix* list;
-int size;
+unsigned int size;
+
+int binarySearch(unsigned int base)
+{
+    unsigned int low = 0;
+    unsigned int high = size;
+    int mid = 0;
+    while(low <= high)
+    {
+        mid = low+(high-low)/2;
+        if(base == list[mid].base)
+        {
+            return mid;
+        }
+        else if(base > list[mid].base)
+        {
+            low = mid+1;
+        }
+        else
+        {
+            high = mid-1;
+        }
+    }
+    return low;
+}
+
+void sort(unsigned int base)
+{
+    unsigned int aux = size,loc;
+    struct prefix storage;
+    for(int i=1; i<size;i++)
+    {
+        aux = i-1;
+        loc = binarySearch(base);
+        while(aux >= loc)
+            {
+                list[aux+1] = list[aux];
+                aux--;
+            }
+        list[aux+1] = storage;
+    }
+}
 
 //will have most responsibilities and will decide whether prefix
 //should be overwritten, extended or just new space should be created
@@ -18,17 +59,40 @@ int add(unsigned int base, char mask)
     /*
         TO DO
         1. INTEGER OVERFLOW PREVENTION
-        2. BINARY INSERTION
+        2. CREATE SMARTER SORTING
     */
-    //Dodanie prefiksu do zbioru. Zwraca 0 lub -1 dla b³êdnych argumentów wywo³ania.
     if(mask < 33 && mask >=0)
     {
         if(base <= 4294967295 && base >= 0)
         {
-            list = realloc(list, sizeof(list)+sizeof(struct prefix));
-            list[size].base = base;
-            list[size].mask = mask;
-            size++;
+                list = realloc(list, sizeof(struct prefix)*(size+1));//allocate new space
+                list[size].base = base;
+                list[size].mask = mask;
+                if(size >=1)
+                {
+                    for(int i=0;i<=size;i++)
+                    {
+                        for(int j=i+1;j<=size;j++)
+                        {
+                            if(list[i].base > list[j].base)
+                            {
+                                struct prefix temp = list[i];
+                                list[i] = list[j];
+                                list[j] = temp;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    if(list[0].base > list[1].base)
+                    {
+                        struct prefix temp = list[1];
+                        list[1] = list[0];
+                        list[0] = temp;
+                    }
+                }
+                size++;
         }
         else
         {
@@ -48,7 +112,7 @@ int add(unsigned int base, char mask)
 int del(unsigned int base, char mask)
 {
 
-
+    return -2;
 }
 
 //char check(unsigned int ip)
@@ -113,9 +177,13 @@ int main(int argc, char *argv[2])
     size = 0;
     int result = 0;
 
-    result = add(316772344, 31);
-    result = add(429496295, 21);
-    result = add(294967295, 14);
+    result = add(42949629, 31);
+    result = add(31772344, 21);
+    result = add(29496725, 14);
+    result = add(3329496725, 5);
+    result = add(57, 9);
+    result = add(317744, 11);
+    result = add(22222222,22);
 
     printf("%d\n", result);
     printList();

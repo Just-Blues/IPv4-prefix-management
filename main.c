@@ -12,7 +12,9 @@ struct prefix
 struct prefix* list;
 unsigned int size;
 
-int binarySearch(unsigned int base)
+void printIpAddress(struct prefix ip);
+
+unsigned int binarySearch(unsigned int base)
 {
     unsigned int low = 0;
     unsigned int high = size;
@@ -135,8 +137,50 @@ int del(unsigned int base, char mask)
 
 char check(unsigned int ip)
 {
+    /*
+        TO DO
+        THINK ABOUT THE HIGHEST POSSIBLE
+    */
+    unsigned int locate = binarySearch(ip);
+    if(locate == 0 && size == 0)
+    {
+        return -2;
+    }
 
-    return 'A';
+    if(list[locate].base == ip)
+    {
+        return list[locate].mask;
+    }
+
+    else if (list[locate].base > ip)
+    {
+        locate--;
+        unsigned int inverted = ~(~0 << (32 - list[locate].mask));
+        inverted = list[locate].base ^ inverted;
+        //printf("Lowest address in prefix: %u\n",list[locate].base );
+        //printf("Highest address in prefix: %u\n", inverted);
+
+        if(ip >= list[locate].base && ip <= inverted)
+        {
+            return list[locate].mask;
+        }
+
+        return -1;
+    }
+    else if(list[locate].base < ip)
+    {
+        if(locate < 0)
+        {
+            return -1;
+        }
+        if(locate > size)
+        {
+            return -3;
+        }
+    }
+
+    return -2;
+
 }
 
 
@@ -196,37 +240,61 @@ int main(int argc, char *argv[2])
 
     int result = 0;
 
-    result = add(42949629, 31);
-    result = add(31772344, 21);
-    result = add(29496725, 14);
-    result = add(0, 32);
-    result = add(3329496725, 5);
-    result = add(57, 9);
-    result = add(317744, 11);
-    result = add(22222222,22);
-    result = add(4294967295,0);
+    // 10101010.00011100.11001100.01010101
+
+    result = convertBaseToInt("10.20.0.0"); // 10.20.0.0 - 10.20.255.255
+    //169082880
+    result = add(result, 16);
+
+    result = convertBaseToInt("32.64.128.0"); // 32.64.128.0 - 32.64.143.255
+    //541097984
+    result = add(result, 20);
+
+    result = convertBaseToInt("1.252.0.0"); // 1.252.0.0 - 1.255.255.255
+    //33292288
+    result = add(result, 14);
+
+    result = convertBaseToInt("192.168.44.0"); // 192.168.44.0 - 192.168.44.255
+    //3232246784
+    result = add(result, 8);
+
+    result = convertBaseToInt("168.0.0.0"); // 168.0.0.0 - 168.0.0.31
+    //2818572288
+    result = add(result, 27);
+
+    result = convertBaseToInt("69.0.0.0"); // 69.0.0.0 - 69.127.255.255
+    //1157627904
+    result = add(result, 9);
+
+    result = convertBaseToInt("112.89.128.0"); // 112.89.128.0 - 112.89.135.255
+    //1884913664
+    result = add(result, 20);
+
+    result = convertBaseToInt("170.28.204.0"); // 170.28.204.0 - 170.28.255.255
+    //2854013952
+    result = add(result, 22);
+
+    result = convertBaseToInt("254.255.192.0"); // 254.255.192.0 - 254.255.223.255
+    //4278173696
+    result = add(result, 19);
+
+    unsigned int test = 0;
+
+    test = convertBaseToInt("112.89.130.72");
+
+    result = check(test);
+
     printList();
 
+    printf("Result of last function: %d\n", result);
 
-    result = del(4294967295,0);
-    printf("Result of last function: %d, Final size: %d\n", result, size);
-    printList();
+    //printIpAddress(list[3]);
 
-    /*
-    char* base1 = "255.256.256.256";
-
-    struct prefix pre1;
-
-    pre1.base = convertBaseToInt(base1);
-
-    pre1.mask = 16;
-
-    printf("Result: %u\n", pre1.base);
-
-    printIpAddress(pre1);
-    */
 
     free(list);
+    //printf("Getchar() was used to halt the program, click anything");
     //getchar();
     return 0;
+
+
 }

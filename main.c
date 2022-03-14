@@ -12,8 +12,6 @@ struct prefix
 struct prefix* list;
 unsigned int size;
 
-void printIpAddress(struct prefix ip);
-
 unsigned int binarySearch(unsigned int base)
 {
     unsigned int low = 0;
@@ -183,7 +181,6 @@ char check(unsigned int ip)
 
 }
 
-
 unsigned int convertBaseToInt(char* sourceString)
 {
     /*
@@ -229,7 +226,6 @@ void printList()
         printIpAddress(ptr[i]);
     }
 }
-
 
 int main(int argc, char *argv[2])
 {
@@ -280,7 +276,7 @@ int main(int argc, char *argv[2])
 
     unsigned int test = 0;
 
-    test = convertBaseToInt("112.89.130.72");
+    test = convertBaseToInt("254.255.224.0");
 
     result = check(test);
 
@@ -288,13 +284,10 @@ int main(int argc, char *argv[2])
 
     printf("Result of last function: %d\n", result);
 
-    //printIpAddress(list[3]);
-
 
     free(list);
+
     //printf("Getchar() was used to halt the program, click anything");
     //getchar();
     return 0;
-
-
 }

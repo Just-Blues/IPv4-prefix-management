@@ -12,25 +12,35 @@ struct prefix
 struct prefix* list;
 unsigned int size;
 
+void printIpAddress(struct prefix ip);
+void printList();
+
 unsigned int binarySearch(unsigned int base)
 {
     unsigned int low = 0;
-    unsigned int high = size;
-    int mid = 0;
-    while(low <= high)
+    if(base <= list[0].base)
     {
-        mid = low+(high-low)/2;
-        if(base == list[mid].base)
+        return low;
+    }
+    else
+    {
+        unsigned int high = size;
+        int mid = 0;
+        while(low <= high)
         {
-            return mid;
-        }
-        else if(base > list[mid].base)
-        {
-            low = mid+1;
-        }
-        else
-        {
-            high = mid-1;
+            mid = low+(high-low)/2;
+            if(base == list[mid].base)
+            {
+                return mid;
+            }
+            else if(base > list[mid].base)
+            {
+                low = mid+1;
+            }
+            else
+            {
+                high = mid-1;
+            }
         }
     }
     return low;
@@ -59,34 +69,80 @@ int add(unsigned int base, char mask)
                     list = realloc(list, sizeof(struct prefix)*(size+1));
                 }
 
-                list[size].base = base;
-                list[size].mask = mask;
 
-                if(size >=1)
+                if(size >= 2)
                 {
-                    for(int i=0;i<=size;i++)
-                    {
-                        for(int j=i+1;j<=size;j++)
+                        unsigned int position = binarySearch(base);
+                        printf("-------------------------\n");
+                        printf("Current position: %u\n", position);
+                        printf("State of list: \n");
+                        printList();
+                        printf("-------------------------\n");
+                        if(list[position].base == base)
                         {
-                            if(list[i].base > list[j].base)
+                            return -5;
+                        }
+                        else if(position > size)
+                        {
+                            printf("Bigger than size\n");
+                            list[size].base = base;
+                            list[size].mask = mask;
+                        }
+                        else
+                        {
+                            struct prefix current = list[position];
+                            struct prefix next = list[position+1];
                             {
-                                struct prefix temp = list[i];
-                                list[i] = list[j];
-                                list[j] = temp;
+                                list[position].base = base;
+                                list[position].mask = mask;
+                                printf("New entry: ");
+                                printIpAddress(list[position]);
+                                do
+                                {
+                                    if((position +1) >= size)
+                                    {
+                                        break;
+                                    }
+                                    position++;
+                                    printf("iterate: %d\n", position);
+                                    list[position] = current;
+                                    list[position+1] = next;
+                                    next = list[position+1];
+                                    current = next;
+                                }
+                                while(position <= size);
+                                /*{
+                                    if((position +1) >= size)
+                                    {
+                                        break;
+                                    }
+                                    position++;
+                                    printf("iterate: %d\n", position);
+                                    list[position] = current;
+                                    list[position+1] = next;
+                                    next = list[position+1];
+                                    current = next;
+                                }*/
+
                             }
                         }
-                    }
                 }
                 else
                 {
-                    if(list[0].base > list[1].base)
+                    printf("Size < 2\n");
+                    list[size].base = base;
+                    list[size].mask = mask;
+                    if(size == 1)
                     {
-                        struct prefix temp = list[1];
-                        list[1] = list[0];
-                        list[0] = temp;
+                        if(list[0].base > list[1].base)
+                        {
+                            struct prefix temp = list[1];
+                            list[1] = list[0];
+                            list[0] = temp;
+                        }
                     }
                 }
-                size++;
+                //size++;
         }
         else
         {
@@ -97,9 +153,10 @@ int add(unsigned int base, char mask)
     {
         return -1;
     }
-
+    size++;
     return 1;
 }
+
 
 int del(unsigned int base, char mask)
 {
@@ -135,10 +192,6 @@ int del(unsigned int base, char mask)
 
 char check(unsigned int ip)
 {
-    /*
-        TO DO
-        THINK ABOUT THE HIGHEST POSSIBLE
-    */
     unsigned int locate = binarySearch(ip);
     if(locate == 0 && size == 0)
     {
@@ -155,8 +208,6 @@ char check(unsigned int ip)
         locate--;
         unsigned int inverted = ~(~0 << (32 - list[locate].mask));
         inverted = list[locate].base ^ inverted;
-        //printf("Lowest address in prefix: %u\n",list[locate].base );
-        //printf("Highest address in prefix: %u\n", inverted);
 
         if(ip >= list[locate].base && ip <= inverted)
         {
@@ -238,30 +289,43 @@ int main(int argc, char *argv[2])
 
     // 10101010.00011100.11001100.01010101
 
+    result = convertBaseToInt("192.168.44.0"); // 19.168.44.0 - 19.168.44.255
+    //3232246784
+    result = add(result, 8);
+
     result = convertBaseToInt("10.20.0.0"); // 10.20.0.0 - 10.20.255.255
     //169082880
     result = add(result, 16);
 
+    //result = convertBaseToInt("10.20.0.0");
+
+    result = convertBaseToInt("170.28.204.0"); // 170.28.204.0 - 170.28.255.255
+    //2854013952
+    result = add(result, 22);
+
+
+    result = convertBaseToInt("254.255.224.0"); // 10.20.0.0 - 10.20.255.255
+    //169082880
+    result = add(result, 16);
+    //result = binarySearch(result)
+
+
     result = convertBaseToInt("32.64.128.0"); // 32.64.128.0 - 32.64.143.255
     //541097984
     result = add(result, 20);
-
+/*
     result = convertBaseToInt("1.252.0.0"); // 1.252.0.0 - 1.255.255.255
     //33292288
     result = add(result, 14);
 
-    result = convertBaseToInt("192.168.44.0"); // 192.168.44.0 - 192.168.44.255
-    //3232246784
-    result = add(result, 8);
-
     result = convertBaseToInt("168.0.0.0"); // 168.0.0.0 - 168.0.0.31
     //2818572288
     result = add(result, 27);
-
+    //printList();
     result = convertBaseToInt("69.0.0.0"); // 69.0.0.0 - 69.127.255.255
     //1157627904
     result = add(result, 9);
-
+    //printList();
     result = convertBaseToInt("112.89.128.0"); // 112.89.128.0 - 112.89.135.255
     //1884913664
     result = add(result, 20);
@@ -274,12 +338,17 @@ int main(int argc, char *argv[2])
     //4278173696
     result = add(result, 19);
 
+    result = convertBaseToInt("0.1.2.3");
+    result = add(result, 0);
+    */
+/*
     unsigned int test = 0;
 
     test = convertBaseToInt("254.255.224.0");
 
     result = check(test);
-
+*/
+    printf("END OF PROGRAM\n");
     printList();
 
     printf("Result of last function: %d\n", result);
@@ -291,3 +360,4 @@ int main(int argc, char *argv[2])
     //getchar();
     return 0;
 }
+

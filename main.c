@@ -53,8 +53,7 @@ int add(unsigned int base, char mask)
     /*
         TO DO
         1. INTEGER OVERFLOW PREVENTION
-        2. CREATE SMARTER SORTING
-        3. ALL PREFIXES MUST BE UNIQUE, can't add the same thing twice
+        2. ALL PREFIXES MUST BE UNIQUE, can't add the same thing twice
     */
     if(mask < 33 && mask >=0)
     {

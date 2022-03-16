@@ -227,29 +227,39 @@ char check(unsigned int ip)
 
 }
 
-unsigned int convertBaseToInt(char* sourceString)
+struct prefix convertBaseToInt(char* sourceString)
 {
     /*
         TO DO
         EXCEPTION HANDLING
     */
     short len = 0;
-    unsigned char oct[4]={0}, counter =0, counter1=0, i;
-    char buffer[4];
+    unsigned char oct[5]={0}, counter =0, counter1=0, i;
+    char buffer[5];
     len = strlen(sourceString);
 
     for(i=0;i<len;i++)
     {
-        if(sourceString[i]!='.'){
-            buffer[counter++] =sourceString[i];
+        if(sourceString[i]!='.')
+        {
+            buffer[counter++] = sourceString[i];
         }
-        if(sourceString[i]=='.' || i==len-1){
+        if(sourceString[i]=='.' || i==len-1)
+        {
+            buffer[counter]='\0';
+            counter=0;
+            oct[counter1++] = atoi(buffer);
+        }
+        if(sourceString[i]=='/')
+        {
             buffer[counter]='\0';
             counter=0;
             oct[counter1++] = atoi(buffer);
         }
     }
-    unsigned int result = (256*256*256)*oct[0] + (256*256)*oct[1] + (256)*oct[2] + oct[3];
+    struct prefix result;
+    result.base = (256*256*256)*oct[0] + (256*256)*oct[1] + (256)*oct[2] + oct[3];
+    result.mask = oct[4];
     return result;
 }
 
@@ -278,67 +288,63 @@ int main(int argc, char *argv[2])
     size = 0;
 
     int result = 0;
+    struct prefix test;
 
     // 10101010.00011100.11001100.01010101
 
-    result = convertBaseToInt("192.168.44.0"); // 19.168.44.0 - 19.168.44.255
+    test = convertBaseToInt("192.168.44.0/8"); // 19.168.44.0 - 19.168.44.255
     //3232246784
-    result = add(result, 8);
+    result = add(test.base, test.mask);
 
-    result = convertBaseToInt("10.20.0.0"); // 10.20.0.0 - 10.20.255.255
+    test = convertBaseToInt("10.20.0.0/16"); // 10.20.0.0 - 10.20.255.255
     //169082880
-    result = add(result, 16);
+    result = add(test.base, test.mask);
 
     //result = convertBaseToInt("10.20.0.0");
 
-    result = convertBaseToInt("170.28.204.0"); // 170.28.204.0 - 170.28.255.255
+    test = convertBaseToInt("170.28.204.0/22"); // 170.28.204.0 - 170.28.255.255
     //2854013952
-    result = add(result, 22);
+    result = add(test.base, test.mask);
 
 
-    result = convertBaseToInt("254.255.224.0"); // 10.20.0.0 - 10.20.255.255
+    test = convertBaseToInt("254.255.224.0/16"); // 10.20.0.0 - 10.20.255.255
     //169082880
-    result = add(result, 16);
+    result = add(test.base, test.mask);
     //result = binarySearch(result)
 
 
-    result = convertBaseToInt("32.64.128.0"); // 32.64.128.0 - 32.64.143.255
+    test = convertBaseToInt("32.64.128.0/20"); // 32.64.128.0 - 32.64.143.255
     //541097984
-    result = add(result, 20);
+    result = add(test.base, test.mask);
 
-    result = convertBaseToInt("1.252.0.0"); // 1.252.0.0 - 1.255.255.255
+    test = convertBaseToInt("1.252.0.0/14"); // 1.252.0.0 - 1.255.255.255
     //33292288
-    result = add(result, 14);
+    result = add(test.base, test.mask);
 
-    result = convertBaseToInt("168.0.0.0"); // 168.0.0.0 - 168.0.0.31
+    test = convertBaseToInt("168.0.0.0/27"); // 168.0.0.0 - 168.0.0.31
     //2818572288
-    result = add(result, 27);
+    result = add(test.base, test.mask);
     //printList();
-    result = convertBaseToInt("69.0.0.0"); // 69.0.0.0 - 69.127.255.255
+    test = convertBaseToInt("69.0.0.0/9"); // 69.0.0.0 - 69.127.255.255
     //1157627904
-    result = add(result, 9);
+    result = add(test.base, test.mask);
     //printList();
-    result = convertBaseToInt("112.89.128.0"); // 112.89.128.0 - 112.89.135.255
+    test = convertBaseToInt("112.89.128.0/20"); // 112.89.128.0 - 112.89.135.255
     //1884913664
-    result = add(result, 20);
+    result = add(test.base, test.mask);
 
-    result = convertBaseToInt("170.28.204.0"); // 170.28.204.0 - 170.28.255.255
+    test = convertBaseToInt("170.28.204.0/22"); // 170.28.204.0 - 170.28.255.255
     //2854013952
-    result = add(result, 22);
+    result = add(test.base, test.mask);
 
-    result = convertBaseToInt("254.255.192.0"); // 254.255.192.0 - 254.255.223.255
+    test = convertBaseToInt("254.255.192.0/19"); // 254.255.192.0 - 254.255.223.255
     //4278173696
-    result = add(result, 19);
+    result = add(test.base, test.mask);
 
-    result = convertBaseToInt("0.1.2.3");
-    result = add(result, 0);
+    test = convertBaseToInt("0.1.2.3/0");
+    result = add(test.base, test.mask);
 
 
-    unsigned int test = 0;
-
-    test = convertBaseToInt("254.255.224.0");
-
-    result = check(test);
 
     printf("END OF PROGRAM\n");
     printList();

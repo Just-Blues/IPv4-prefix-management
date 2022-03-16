@@ -54,6 +54,7 @@ int add(unsigned int base, char mask)
         TO DO
         1. INTEGER OVERFLOW PREVENTION
         2. ALL PREFIXES MUST BE UNIQUE, can't add the same thing twice
+        3. Search Similar to check();
     */
     if(mask < 33 && mask >=0)
     {
@@ -71,60 +72,44 @@ int add(unsigned int base, char mask)
 
                 if(size >= 2)
                 {
-                        unsigned int position = binarySearch(base);
-                        //printf("-------------------------\n");
-                        //printf("Current position: %u\n", position);
-                        //printf("State of list: \n");
-                        //printList();
-                        //printf("-------------------------\n");
-                        if(list[position].base == base)
+                    unsigned int position = binarySearch(base);
+                    if(list[position].base == base)
+                    {
+                        return -5;
+                    }
+                    else if(position > size)
+                    {
+                        list[size].base = base;
+                        list[size].mask = mask;
+                    }
+                    else
+                    {
+                        struct prefix current = list[position];
+                        struct prefix next;
+                        next.base = 0;
+                        next.mask = 0;
+                        if((position+1) < size)
                         {
-                            return -5;
+                            next = list[position+1];
                         }
-                        else if(position > size)
-                        {
-                            //printf("Bigger than size\n");
-                            list[size].base = base;
-                            list[size].mask = mask;
-                        }
-                        else
-                        {
-                            struct prefix current = list[position];
-                            struct prefix next;
-                            next.base = 0;
-                            next.mask = 0;
-                            if((position+1) < size)
+
+                            list[position].base = base;
+                            list[position].mask = mask;
+                            while(position < size)
                             {
-                                //printf("position+1 < size\n");
+                                position++;
+                                list[position] = current;
+                                if((position +1) > size)
+                                {
+                                    break;
+                                }
+                                current = next;
                                 next = list[position+1];
                             }
-                            //printIpAddress(next);
-                            {
-                                list[position].base = base;
-                                list[position].mask = mask;
-                                //printf("New entry: ");
-                                //printIpAddress(list[position]);
-
-                                while(position < size)
-                                {
-                                    //printf("iterate: %d\n", position);
-                                    position++;
-                                    list[position] = current;
-                                    if((position +1) > size)
-                                    {
-                                        //printf("Break\n");
-                                        break;
-                                    }
-                                    current = next;
-                                    next = list[position+1];
-                                }
-
-                            }
-                        }
+                    }
                 }
                 else
                 {
-                    //printf("Size < 2\n");
                     list[size].base = base;
                     list[size].mask = mask;
                     if(size == 1)
@@ -137,7 +122,6 @@ int add(unsigned int base, char mask)
                         }
                     }
                 }
-                //size++;
         }
         else
         {
@@ -166,6 +150,9 @@ int del(unsigned int base, char mask)
         if(base <= 4294967295 && base >= 0)
         {
             unsigned int loc = binarySearch(base);
+            /*
+                SIMILAR SOLUTION TO CHECK();
+            */
             for(int i=loc;i<=size-1;i++)
             {
                 list[i] = list[i+1];
@@ -258,6 +245,13 @@ struct prefix convertBaseToInt(char* sourceString)
         }
     }
     struct prefix result;
+    if(oct[4] > 32)
+    {
+        printf("Subnet mask is too large, select between 0 and 32\n");
+        result.base = 0;
+        result.mask = 42;
+        return result;
+    }
     result.base = (256*256*256)*oct[0] + (256*256)*oct[1] + (256)*oct[2] + oct[3];
     result.mask = oct[4];
     return result;
@@ -341,11 +335,12 @@ int main(int argc, char *argv[2])
     //4278173696
     result = add(test.base, test.mask);
 
-    test = convertBaseToInt("0.1.2.3/0");
+    test = convertBaseToInt("0.1333.2.34/281");
     result = add(test.base, test.mask);
 
+    //test = convertBaseToInt("1.1.1.1/21");
 
-
+    //result = del(test.base,test.mask);
     printf("END OF PROGRAM\n");
     printList();
 

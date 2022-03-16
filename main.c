@@ -233,47 +233,50 @@ unsigned int isCorrect(char* stringSource)
     short len = strlen(stringSource);
     for(i=0; i < len; i++)
     {
-        printf("Current char: %c Iterate: %d\n", stringSource[i], i);
+        printf("Current char: %c | Iteratation: %d | Counter state: %d\n", stringSource[i], i, counter);
         if(stringSource[i]!='.' && stringSource[i] >= '0' && stringSource[i] <= '9')
         {
+            counter++;
             if(counter > 3)
             {
-                printf("Counter overflow\n");
+                printf("Maximum 3 digits are allowed between .\n");
                 return 0;
             }
-            counter++;
         }
-        else if(stringSource[i] =='.')
+
+        if(stringSource[i] =='.')
         {
-            counter--;
-            if(counter == 3 && stringSource[i - (counter)] > '2')
+            printf("String[i] == . \n");
+            if(counter == 3 && stringSource[i - counter] > '2')
             {
-                printf("something happend\n");
+                printf("One of the IP bytes is too large, select between 0 and 255\n");
                 return 0;
             }
             counter = 0;
         }
-        else
+        //LOOK FOR BETTER WAY
+        if(stringSource[i] =='/')
         {
-            if(stringSource[i] != '/')
-            {
-                printf("huh: %c\n",stringSource[i]);
-                return 0;
-            }
-            else if(((len-1) - i) > 2)
-            {
-                printf("Checked: %d and %d Current char: %c\n", len, i, stringSource[i]);
-                return 0;
-            }
-            else if(stringSource[len - 2] > '3' && stringSource[len - 1] > '2')
-            {
-                printf("That happend: %c\n", stringSource[len-2]);
-                return 0;
-            }
             counter = 0;
+            if((len-1) - i <= 2)
+            {
+                if(stringSource[len - 2] >= '3')
+                {
+                    if(stringSource[len - 1] > '2' && stringSource[len - 2] <= '3');
+                    {
+                        printf("Mask too large, select between 0 and 32\n");
+                        return 0;
+                    }
+                }
+            }
+            else
+            {
+                printf("Mask too large, select between 0 and 32\n");
+                return 0;
+            }
+            //break;
         }
     }
-
     return 1;
 }
 
@@ -401,7 +404,7 @@ int main(int argc, char *argv[2])
     //test = convertBaseToInt("254.255.224.0");
 
     //result = check(test);
-    result = isCorrect("144.2.221.0/22");
+    result = isCorrect("144.27.221.90/32");
 
     printf("END OF PROGRAM\n");
     //printList();

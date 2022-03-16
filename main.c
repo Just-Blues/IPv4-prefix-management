@@ -12,8 +12,8 @@ struct prefix
 struct prefix* list;
 unsigned int size;
 
-void printIpAddress(struct prefix ip);
-void printList();
+//void printIpAddress(struct prefix ip);
+//void printList();
 
 unsigned int binarySearch(unsigned int base)
 {
@@ -227,29 +227,90 @@ char check(unsigned int ip)
 
 }
 
-unsigned int convertBaseToInt(char* sourceString)
+unsigned int isCorrect(char* stringSource)
+{
+    short counter = 0,i;
+    short len = strlen(stringSource);
+    for(i=0; i < len; i++)
+    {
+        printf("Current char: %c Iterate: %d\n", stringSource[i], i);
+        if(stringSource[i]!='.' && stringSource[i] >= '0' && stringSource[i] <= '9')
+        {
+            if(counter > 3)
+            {
+                printf("Counter overflow\n");
+                return 0;
+            }
+            counter++;
+        }
+        else if(stringSource[i] =='.')
+        {
+            counter--;
+            if(counter == 3 && stringSource[i - (counter)] > '2')
+            {
+                printf("something happend\n");
+                return 0;
+            }
+            counter = 0;
+        }
+        else
+        {
+            if(stringSource[i] != '/')
+            {
+                printf("huh: %c\n",stringSource[i]);
+                return 0;
+            }
+            else if(((len-1) - i) > 2)
+            {
+                printf("Checked: %d and %d Current char: %c\n", len, i, stringSource[i]);
+                return 0;
+            }
+            else if(stringSource[len - 2] > '3' && stringSource[len - 1] > '2')
+            {
+                printf("That happend: %c\n", stringSource[len-2]);
+                return 0;
+            }
+            counter = 0;
+        }
+    }
+
+    return 1;
+}
+
+
+struct prefix convertBaseToInt(char* sourceString)
 {
     /*
         TO DO
         EXCEPTION HANDLING
     */
     short len = 0;
-    unsigned char oct[4]={0}, counter =0, counter1=0, i;
-    char buffer[4];
+    unsigned char oct[5]={0}, counter =0, counter1=0, i;
+    char buffer[5];
     len = strlen(sourceString);
 
     for(i=0;i<len;i++)
     {
-        if(sourceString[i]!='.'){
-            buffer[counter++] =sourceString[i];
+        if(sourceString[i]!='.')
+        {
+            buffer[counter++] = sourceString[i];
         }
-        if(sourceString[i]=='.' || i==len-1){
+        if(sourceString[i]=='.' || i==len-1)
+        {
+            buffer[counter]='\0';
+            counter=0;
+            oct[counter1++] = atoi(buffer);
+        }
+        if(sourceString[i]=='/')
+        {
             buffer[counter]='\0';
             counter=0;
             oct[counter1++] = atoi(buffer);
         }
     }
-    unsigned int result = (256*256*256)*oct[0] + (256*256)*oct[1] + (256)*oct[2] + oct[3];
+    struct prefix result;
+    result.base = (256*256*256)*oct[0] + (256*256)*oct[1] + (256)*oct[2] + oct[3];
+    result.mask = oct[4];
     return result;
 }
 
@@ -260,7 +321,7 @@ void printIpAddress(struct prefix ip)
     bytes[1] = (ip.base >> 8) & 0xFF;
     bytes[2] = (ip.base >> 16) & 0xFF;
     bytes[3] = (ip.base >> 24) & 0xFF;
-    printf("%u.%u.%u.%u/%d\n", bytes[3], bytes[2], bytes[1], bytes[0], ip.mask);
+    printf("%u.%u.%u.%u/%u\n", bytes[3], bytes[2], bytes[1], bytes[0], ip.mask);
 }
 
 void printList()
@@ -279,6 +340,7 @@ int main(int argc, char *argv[2])
 
     int result = 0;
 
+    /*
     // 10101010.00011100.11001100.01010101
 
     result = convertBaseToInt("192.168.44.0"); // 19.168.44.0 - 19.168.44.255
@@ -333,15 +395,16 @@ int main(int argc, char *argv[2])
     result = convertBaseToInt("0.1.2.3");
     result = add(result, 0);
 
+    */
+    //unsigned int test = 0;
 
-    unsigned int test = 0;
+    //test = convertBaseToInt("254.255.224.0");
 
-    test = convertBaseToInt("254.255.224.0");
-
-    result = check(test);
+    //result = check(test);
+    result = isCorrect("144.2.221.0/22");
 
     printf("END OF PROGRAM\n");
-    printList();
+    //printList();
 
     printf("Result of last function: %d\n", result);
 

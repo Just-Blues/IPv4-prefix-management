@@ -329,11 +329,6 @@ int main(int argc, char *argv[2])
         return 1;
     }
 
-    /*
-    printf("___________________________\n");
-    printf("Check test 4, entry: 32.64.128.0/20\n");
-    */
-
     free(list);
     printf("Getchar() was used to halt the program, click anything: \n");
     getchar();

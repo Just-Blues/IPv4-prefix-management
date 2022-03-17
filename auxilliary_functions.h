@@ -7,8 +7,8 @@
 
 struct prefix
 {
-    unsigned int base; //address stored as 32 bits
-    char mask; //stored as char because it's size is 1 byte
+    unsigned int base;
+    char mask;
 };
 
 struct prefix* list;

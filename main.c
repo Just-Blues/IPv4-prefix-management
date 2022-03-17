@@ -138,7 +138,7 @@ char check(unsigned int ip)
         locate--;
         unsigned int inverted = ~(~0 << (32 - list[locate].mask));
         inverted = list[locate].base ^ inverted;
-        unsigned int i = locate, j = locate;
+        unsigned int j = locate;
 
         if(ip >= list[locate].base && ip <= inverted)
         {

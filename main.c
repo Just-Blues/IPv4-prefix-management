@@ -55,6 +55,8 @@ int add(unsigned int base, char mask)
         1. INTEGER OVERFLOW PREVENTION
         2. ALL PREFIXES MUST BE UNIQUE, can't add the same thing twice
         3. Search Similar to check();
+        Needs to compare raw values (base with base) and check if the new prefix is contained in the mask of the other one
+        Or maybe just let them both stay, why not.
     */
     if(mask < 33 && mask >=0)
     {
@@ -68,16 +70,20 @@ int add(unsigned int base, char mask)
                 {
                     list = realloc(list, sizeof(struct prefix)*(size+1));
                 }
-
+                unsigned int position = binarySearch(base);
 
                 if(size >= 2)
                 {
-                    unsigned int position = binarySearch(base);
-                    if(list[position].base == base)
+                    if(list[position].base == base && list[position].mask == mask)
                     {
-                        return -5;
+                        return -1;
                     }
-                    else if(position > size)
+
+                    while(list[position].mask < mask && list[position].base == base)
+                    {
+                        position++;
+                    }
+                    if(position > size)
                     {
                         list[size].base = base;
                         list[size].mask = mask;
@@ -114,7 +120,7 @@ int add(unsigned int base, char mask)
                     list[size].mask = mask;
                     if(size == 1)
                     {
-                        if(list[0].base > list[1].base)
+                        if(list[0].base > list[1].base && list[0].mask != list[1].mask)
                         {
                             struct prefix temp = list[1];
                             list[1] = list[0];
@@ -144,22 +150,23 @@ int del(unsigned int base, char mask)
         1. INTEGER OVERFLOW PREVENTION
         2. EXCEPTION HANDLING
         3. THINK ABOUT WHAT INFLUENCE MASK HAS
+        Not exactly, all it has to do is compare raw base and mask values and delete
     */
     if(mask < 33 && mask >=0)
     {
         if(base <= 4294967295 && base >= 0)
         {
             unsigned int loc = binarySearch(base);
-            /*
-                SIMILAR SOLUTION TO CHECK();
-            */
-            for(int i=loc;i<=size-1;i++)
+            if(list[loc].base == base && list[loc].mask == mask)
             {
-                list[i] = list[i+1];
+                for(int i=loc;i<=size-1;i++)
+                {
+                    list[i] = list[i+1];
+                }
+                list = realloc(list, sizeof(struct prefix)*(size));
+                size--;
+                return 1;
             }
-            list = realloc(list, sizeof(struct prefix)*(size));
-            size--;
-            return 2;
         }
         else
         {
@@ -170,6 +177,7 @@ int del(unsigned int base, char mask)
     {
          return -1;
     }
+    return 0;
 }
 
 char check(unsigned int ip)
@@ -177,7 +185,7 @@ char check(unsigned int ip)
     unsigned int locate = binarySearch(ip);
     if(locate == 0 && size == 0)
     {
-        return -2;
+        return -1;
     }
 
     if(list[locate].base == ip)
@@ -190,10 +198,15 @@ char check(unsigned int ip)
         locate--;
         unsigned int inverted = ~(~0 << (32 - list[locate].mask));
         inverted = list[locate].base ^ inverted;
-
+        unsigned int i = locate;
         if(ip >= list[locate].base && ip <= inverted)
         {
-            return list[locate].mask;
+            while(list[i].mask > list[i-1].mask && !(list[i].base < list[locate].base) &&  i!=0)
+            {
+                printf("Loop?\n");
+                i--;
+            }
+            return list[i].mask;
         }
 
         return -1;
@@ -206,15 +219,15 @@ char check(unsigned int ip)
         }
         if(locate > size)
         {
-            return -3;
+            return -1;
         }
     }
 
-    return -2;
+    return 0;
 
 }
 
-struct prefix convertBaseToInt(char* sourceString)
+struct prefix convertStringToPrefix(char* sourceString)
 {
     /*
         TO DO
@@ -286,61 +299,67 @@ int main(int argc, char *argv[2])
 
     // 10101010.00011100.11001100.01010101
 
-    test = convertBaseToInt("192.168.44.0/8"); // 19.168.44.0 - 19.168.44.255
+    test = convertStringToPrefix("192.168.44.0/8"); // 19.168.44.0 - 19.168.44.255
     //3232246784
     result = add(test.base, test.mask);
 
-    test = convertBaseToInt("10.20.0.0/16"); // 10.20.0.0 - 10.20.255.255
+    test = convertStringToPrefix("10.20.0.0/16"); // 10.20.0.0 - 10.20.255.255
     //169082880
     result = add(test.base, test.mask);
 
-    //result = convertBaseToInt("10.20.0.0");
+    //result = convertStringToPrefix("10.20.0.0");
 
-    test = convertBaseToInt("170.28.204.0/22"); // 170.28.204.0 - 170.28.255.255
+    test = convertStringToPrefix("170.28.204.0/22"); // 170.28.204.0 - 170.28.255.255
     //2854013952
     result = add(test.base, test.mask);
 
 
-    test = convertBaseToInt("254.255.224.0/16"); // 10.20.0.0 - 10.20.255.255
+    test = convertStringToPrefix("254.255.224.0/16"); // 10.20.0.0 - 10.20.255.255
     //169082880
     result = add(test.base, test.mask);
     //result = binarySearch(result)
 
 
-    test = convertBaseToInt("32.64.128.0/20"); // 32.64.128.0 - 32.64.143.255
+    test = convertStringToPrefix("32.64.128.0/20"); // 32.64.128.0 - 32.64.143.255
     //541097984
     result = add(test.base, test.mask);
 
-    test = convertBaseToInt("1.252.0.0/14"); // 1.252.0.0 - 1.255.255.255
+    test = convertStringToPrefix("1.252.0.0/14"); // 1.252.0.0 - 1.255.255.255
     //33292288
     result = add(test.base, test.mask);
 
-    test = convertBaseToInt("168.0.0.0/27"); // 168.0.0.0 - 168.0.0.31
+    test = convertStringToPrefix("168.0.0.0/27"); // 168.0.0.0 - 168.0.0.31
     //2818572288
     result = add(test.base, test.mask);
-    //printList();
-    test = convertBaseToInt("69.0.0.0/9"); // 69.0.0.0 - 69.127.255.255
+
+    test = convertStringToPrefix("69.0.0.0/9"); // 69.0.0.0 - 69.127.255.255
     //1157627904
     result = add(test.base, test.mask);
-    //printList();
-    test = convertBaseToInt("112.89.128.0/20"); // 112.89.128.0 - 112.89.135.255
+
+    test = convertStringToPrefix("112.89.128.0/20"); // 112.89.128.0 - 112.89.135.255
     //1884913664
     result = add(test.base, test.mask);
 
-    test = convertBaseToInt("170.28.204.0/22"); // 170.28.204.0 - 170.28.255.255
+    test = convertStringToPrefix("170.28.204.0/22"); // 170.28.204.0 - 170.28.255.255
     //2854013952
     result = add(test.base, test.mask);
 
-    test = convertBaseToInt("254.255.192.0/19"); // 254.255.192.0 - 254.255.223.255
+    test = convertStringToPrefix("254.255.192.0/19"); // 254.255.192.0 - 254.255.223.255
     //4278173696
     result = add(test.base, test.mask);
 
-    test = convertBaseToInt("0.1333.2.34/281");
+    test = convertStringToPrefix("168.0.0.0/19");
     result = add(test.base, test.mask);
 
-    //test = convertBaseToInt("1.1.1.1/21");
+    test = convertStringToPrefix("1.252.0.0/12");
 
-    //result = del(test.base,test.mask);
+    result = add(test.base,test.mask);
+
+    test = convertStringToPrefix("69.127.0.0/1");
+
+
+    result = check(test.base);
+
     printf("END OF PROGRAM\n");
     printList();
 
@@ -349,7 +368,7 @@ int main(int argc, char *argv[2])
 
     free(list);
 
-    //printf("Getchar() was used to halt the program, click anything");
-    //getchar();
+    printf("Getchar() was used to halt the program, click anything");
+    getchar();
     return 0;
 }

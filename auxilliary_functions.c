@@ -1,5 +1,8 @@
 #include "auxilliary_functions.h"
 
+struct prefix* list;
+unsigned int size;
+
 unsigned int binarySearch(unsigned int base)
 {
     /*

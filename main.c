@@ -1,5 +1,8 @@
 #include "auxilliary_functions.h"
 
+extern struct prefix* list;
+extern unsigned int size;
+
 int add(unsigned int base, char mask)
 {
     if(mask < 33 && mask >=0)

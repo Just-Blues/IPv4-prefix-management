@@ -11,9 +11,6 @@ struct prefix
     char mask;
 };
 
-struct prefix* list;
-unsigned int size;
-
 int add(unsigned int base, char mask);
 int del(unsigned int base, char mask);
 char check(unsigned int ip);
@@ -24,5 +21,6 @@ struct prefix convertStringToPrefix(char* sourceString);
 unsigned int binarySearch(unsigned int base);
 void printIpAddress(struct prefix ip);
 void printList();
+
 
 #endif // AUXILLIARY_FUNCTIONS_H_INCLUDED

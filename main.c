@@ -7,7 +7,7 @@ int add(unsigned int base, char mask)
 {
     if(mask < 33 && mask >=0)
     {
-        if(base <= 4294967295 && base >= 0)
+        if(base <= 0xFFFFFFFF && base >= 0)
         {
                 if(size == 0 )
                 {
@@ -97,7 +97,7 @@ int del(unsigned int base, char mask)
     }
     if(mask < 33 && mask >=0)
     {
-        if(base <= 4294967295 && base >= 0)
+        if(base <= 0xFFFFFFFF && base >= 0)
         {
             unsigned int loc = binarySearch(base);
             if(list[loc].base == base && list[loc].mask == mask)
